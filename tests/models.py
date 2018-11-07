@@ -14,4 +14,4 @@ class Person(models.Model):
         output_field=models.TextField()
     ))
 
-    lower_name = AnnotateField(Lower(models.F('name')))
+    lower_name = AnnotateField(Lower(models.F('name')), db_index=True)
