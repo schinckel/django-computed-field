@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+django-annotate-field = {editable = true, path = "."}
+dj-database-url = "*"
+
+[dev-packages]
+pytest-django = "*"
+pytest-cov = "*"
+
+[requires]
+python_version = "3.6"
