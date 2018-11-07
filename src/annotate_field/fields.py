@@ -34,12 +34,18 @@ class AnnotateField(models.Field):
             if frame.function == 'add_fields':
                 query = frame.frame.f_locals['self']
                 break
+            if frame.function == 'build_filter':
+                query = frame.frame.f_locals['self']
+                break
+        else:
+            import pdb; pdb.set_trace()
 
         if query:
             col = self.expression.resolve_expression(query=query)
             col.target = self
             col.alias = alias  # Do we need this?
             return col
+
 
     def contribute_to_class(self, cls, name, private_only=True):
         # We use a private field, because that then means it won't be added to the
