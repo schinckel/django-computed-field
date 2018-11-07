@@ -25,3 +25,15 @@ def test_filter_on_annotate_field():
     assert not Person.objects.filter(name='Foo Bar').exists()
     Person.objects.create(first_name='Foo', last_name='Bar')
     assert Person.objects.filter(name='Foo Bar').exists()
+
+
+@pytest.mark.django_db
+def test_filter_transform_on_annotate_field():
+    Person.objects.create(first_name='Foo', last_name='Bar')
+    assert Person.objects.filter(name__icontains='foo').exists()
+
+
+@pytest.mark.django_db
+def test_cascading_field():
+    Person.objects.create(first_name='Foo', last_name='Bar')
+    assert Person.objects.filter(lower_name='foo bar')
