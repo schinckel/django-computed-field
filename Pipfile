@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 django = "*"
-django-annotate-field = {editable = true, path = "."}
+django-computed-field = {editable = true, path = "."}
 dj-database-url = "*"
 
 [dev-packages]

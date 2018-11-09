@@ -3,7 +3,7 @@ import inspect
 from django.db import models
 
 
-class AnnotateField(models.Field):
+class ComputedField(models.Field):
     def __init__(self, expression, *args, **kwargs):
         # We want to trigger the read-only behaviour in the admin.
         kwargs.update(editable=False)

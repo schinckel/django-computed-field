@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='django-annotate-field',
+    name='django-computed-field',
     version='0.1.0',
-    description='AnnotateField(): automatically annotate expressions',
-    url='https://bitbucket.org/schinckel/django-annotate-field',
+    description='ComputedField(): automatically annotate expressions',
+    url='https://bitbucket.org/schinckel/django-computed-field',
     author='Matthew Schinckel',
     author_email='matt@schinckel.net',
     packages=find_packages('src', exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),

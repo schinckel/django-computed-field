@@ -32,7 +32,7 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
 AUTH_USER_MODEL = 'auth.User'
-SECRET_KEY = 'django-annotate-field-sekret-keye'
+SECRET_KEY = 'django-computed-field-sekret-keye'
 
 
 TEMPLATES = [
