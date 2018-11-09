@@ -36,4 +36,4 @@ def test_filter_transform_on_computed_field():
 @pytest.mark.django_db
 def test_cascading_field():
     Person.objects.create(first_name='Foo', last_name='Bar')
-    assert Person.objects.filter(lower_name='foo bar')
+    assert Person.objects.filter(lower_name='foo bar').exists()
