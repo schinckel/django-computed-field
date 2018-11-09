@@ -8,7 +8,7 @@ class ComputedField(models.Field):
         # We want to trigger the read-only behaviour in the admin.
         kwargs.update(editable=False)
         # Ensure we have an output field on our expression?
-        self.expression = expression
+        self.expression = expression.copy()
         super().__init__(*args, **kwargs)
         # Can we prevent this field from being used in a form?
 
@@ -43,11 +43,12 @@ class ComputedField(models.Field):
         if query:
             col = self.expression.resolve_expression(query=query)
             col.target = self
-            col.alias = alias  # Do we need this?
             return col
 
     def contribute_to_class(self, cls, name, private_only=True):
         # We use a private field, because that then means it won't be added to the
         # list of local/concrete fields (which would mean we can change how and when
-        # it is included in the query).
+        # it is included in the query). I think this is the mechanism that is used
+        # by inherited fields. Seems to work okay, unless we try to use this field
+        # in an index.
         super().contribute_to_class(cls, name, True)
