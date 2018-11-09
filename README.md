@@ -24,7 +24,7 @@ A very common pattern, at least in code I've written and seen, is to use `.annot
 
         objects = PersonQuerySet.as_manager()
 
-(Yes, I'm aware of falsehoods programmers believe about names, this is just a really neat example).
+(Yes, I'm aware of [falsehoods programmers believe about names](https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/), this is just a really neat example).
 
 In order to get access to the name "field", we must ensure we use the ``Person.objects.with_name()`` queryset method each time we need it; alternatively we could look at overriding a manager's `get_queryset()` to always apply this.
 
