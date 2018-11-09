@@ -43,3 +43,8 @@ However, it would be neat if it we could define this field directly on the model
                 output_field=models.TextField(),
             ),
         )
+
+
+This is still a proof of concept: whilst it works in the tests I have written so far, it may not work in all cases (and actually still contains a `pdb` breakpoint, sort-of deliberately).
+
+It's also missing major functionality that I think is required before it can be used: the ability to declare that a ComputedField should have an index, and the migrations framework detecting that, and creating one. This currently cannot be done due to the mechanism I have used for avoiding other things happening (like the value being sent to the database when we save) also prevents the field from being used in indices.
