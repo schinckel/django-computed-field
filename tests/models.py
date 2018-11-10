@@ -14,4 +14,9 @@ class Person(models.Model):
         output_field=models.TextField()
     ))
 
-    lower_name = ComputedField(Lower(models.F('name')), db_index=True)
+    lower_name = ComputedField(Lower(models.F('name')))
+
+    class Meta:
+        indexes = [
+            # models.Index(fields=['lower_name']),
+        ]

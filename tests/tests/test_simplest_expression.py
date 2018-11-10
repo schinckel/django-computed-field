@@ -4,6 +4,17 @@ import pytest
 
 
 @pytest.mark.django_db
+def test_computed_field_exists_and_can_be_queried():
+    assert not Person.objects.filter(name='foo bar').exists()
+
+
+@pytest.mark.django_db
+def test_values_query_result_includes_column():
+    Person.objects.create(first_name='Foo', last_name='Bar')
+    assert 'name' in Person.objects.values()[0]
+
+
+@pytest.mark.django_db
 def test_create_works():
     Person.objects.create(first_name='Foo', last_name='Bar')
 

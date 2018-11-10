@@ -1,6 +1,7 @@
 import inspect
 
 from django.db import models
+from django.db.models.query_utils import DeferredAttribute
 
 
 class ComputedField(models.Field):
@@ -45,10 +46,17 @@ class ComputedField(models.Field):
             col.target = self
             return col
 
-    def contribute_to_class(self, cls, name, private_only=True):
+    def get_attname_column(self):
+        return self.get_attname(), None
+
+    def contribute_to_class(self, cls, name, private_only=False):
         # We use a private field, because that then means it won't be added to the
         # list of local/concrete fields (which would mean we can change how and when
         # it is included in the query). I think this is the mechanism that is used
         # by inherited fields. Seems to work okay, unless we try to use this field
         # in an index.
-        super().contribute_to_class(cls, name, True)
+        # super().contribute_to_class(cls, name, True)
+        # return
+        super().contribute_to_class(cls, name, private_only)
+        if not getattr(cls, self.attname, None):
+            setattr(cls, self.attname, DeferredAttribute(self.attname))
