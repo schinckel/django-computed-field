@@ -1,4 +1,4 @@
-from ..models import Person
+from ..models import Address, Person
 
 import pytest
 
@@ -48,3 +48,14 @@ def test_filter_transform_on_computed_field():
 def test_cascading_field():
     Person.objects.create(first_name='Foo', last_name='Bar')
     assert Person.objects.filter(lower_name='foo bar').exists()
+
+
+@pytest.mark.django_db
+def test_ordering():
+    assert len(Person.objects.order_by('name')) == 0
+
+
+@pytest.mark.django_db
+def test_joined_lookup():
+    assert len(Address.objects.filter(person__name='foo')) == 0
+    assert len(Address.objects.filter(person__name__icontains='foo')) == 0

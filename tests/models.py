@@ -20,3 +20,7 @@ class Person(models.Model):
         indexes = [
             # models.Index(fields=['lower_name']),
         ]
+
+
+class Address(models.Model):
+    person = models.OneToOneField(Person, related_name='address', primary_key=True, on_delete=models.CASCADE)

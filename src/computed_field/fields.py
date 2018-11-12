@@ -1,6 +1,7 @@
 import inspect
 
 from django.db import models
+from django.db.models.expressions import Col
 
 
 class ComputedField(models.Field):
@@ -25,23 +26,35 @@ class ComputedField(models.Field):
         return name, path, [self.expression] + args, kwargs
 
     def get_col(self, alias, output_field=None):
+
+        def resolve_f(expression):
+            if hasattr(expression, 'get_source_expressions'):
+                expression = expression.copy()
+                expression.set_source_expressions([
+                    resolve_f(expr) for expr in expression.get_source_expressions()
+                ])
+            if isinstance(expression, models.F):
+                field = self.model._meta.get_field(expression.name)
+                if hasattr(field, 'expression'):
+                    return resolve_f(field.expression)
+                return Col(alias, field)
+            return expression
+
         # I'd love some way to get the query object without having to peek up the stack...
         query = None
         for frame in inspect.stack():
-            if frame.function == 'get_default_columns':
+            if frame.function in ['get_default_columns', 'get_order_by']:
                 query = frame.frame.f_locals['self'].query
                 break
-            if frame.function == 'add_fields':
-                query = frame.frame.f_locals['self']
-                break
-            if frame.function == 'build_filter':
+            if frame.function in ['add_fields', 'build_filter']:
                 query = frame.frame.f_locals['self']
                 break
         else:
             import pdb; pdb.set_trace()  # NOQA
 
-        col = self.expression.resolve_expression(query=query)
+        col = resolve_f(self.expression).resolve_expression(query=query)
         col.target = self
+        col.alias = self.name
         return col
 
     def contribute_to_class(self, cls, name, private_only=False):
