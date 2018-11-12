@@ -1,4 +1,4 @@
-from ..models import Address, Person
+from ..models import Person
 
 import pytest
 
@@ -53,9 +53,3 @@ def test_cascading_field():
 @pytest.mark.django_db
 def test_ordering():
     assert len(Person.objects.order_by('name')) == 0
-
-
-@pytest.mark.django_db
-def test_joined_lookup():
-    assert len(Address.objects.filter(person__name='foo')) == 0
-    assert len(Address.objects.filter(person__name__icontains='foo')) == 0
