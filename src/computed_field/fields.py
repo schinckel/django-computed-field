@@ -28,12 +28,27 @@ class ComputedField(models.Field):
     def get_col(self, alias, output_field=None):
 
         def resolve_f(expression):
+            # Because of the fact that F() expressions refer to the "local" table,
+            # we need to resolve these to a Col() expression that uses the table
+            # alias (supplied to us), and the field that the F() expression refers
+            # to. This is then complicated by the fact that we could have an F()
+            # expression that refers to a ComputedField - which we just want to
+            # resolve the inner F expressions in right now. We'll rely on the
+            # fact that resolve_expression() will keep resolving source expressions
+            # to handle everything else: this is just a precursor to that.
             if hasattr(expression, 'get_source_expressions'):
+                # We want a copy here, because otherwise we'd be mutating objects we
+                # really shouldn't, which could affect places where the same expression
+                # was shared between different things.
                 expression = expression.copy()
                 expression.set_source_expressions([
                     resolve_f(expr) for expr in expression.get_source_expressions()
                 ])
             if isinstance(expression, models.F):
+                # If we are dealing with an F() expression, we want to try to resolve
+                # it to a Col(alias, field) for the relevant field on our model.
+                # If that is a ComputedField(), then just resolve the F() expressions
+                # inside that.
                 field = self.model._meta.get_field(expression.name)
                 if hasattr(field, 'expression'):
                     return resolve_f(field.expression)
