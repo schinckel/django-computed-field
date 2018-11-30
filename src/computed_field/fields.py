@@ -10,7 +10,7 @@ class ComputedField(models.Field):
         kwargs.update(editable=False)
         # Ensure we have an output field on our expression?
         self.expression = expression.copy()
-        super().__init__(*args, **kwargs)
+        super(ComputedField, self).__init__(*args, **kwargs)
         # Can we prevent this field from being used in a form?
 
     def db_type(self, connection):
@@ -22,7 +22,7 @@ class ComputedField(models.Field):
         return self.expression.output_field.from_db_value(value, expression, connection)
 
     def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
+        name, path, args, kwargs = super(ComputedField, self).deconstruct()
         return name, path, [self.expression] + args, kwargs
 
     def get_col(self, alias, output_field=None):
@@ -78,4 +78,4 @@ class ComputedField(models.Field):
         # it is included in the query). I think this is the mechanism that is used
         # by inherited fields. Seems to work okay, unless we try to use this field
         # in an index.
-        super().contribute_to_class(cls, name, True)
+        super(ComputedField, self).contribute_to_class(cls, name, True)

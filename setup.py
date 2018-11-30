@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='django-computed-field',
-    version='0.1.0',
+    version='0.8.0',
     description='ComputedField(): automatically annotate expressions',
     url='https://bitbucket.org/schinckel/django-computed-field',
     author='Matthew Schinckel',

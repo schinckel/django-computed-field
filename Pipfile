@@ -7,10 +7,11 @@ name = "pypi"
 django = "*"
 django-computed-field = {editable = true, path = "."}
 dj-database-url = "*"
-
-[dev-packages]
 pytest-django = "*"
 pytest-cov = "*"
+pytest = "*"
+
+[dev-packages]
 
 [requires]
 python_version = "3.6"
