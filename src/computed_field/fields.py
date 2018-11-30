@@ -58,11 +58,15 @@ class ComputedField(models.Field):
         # I'd love some way to get the query object without having to peek up the stack...
         query = None
         for frame in inspect.stack():
-            if frame.function in ['get_default_columns', 'get_order_by']:
-                query = frame.frame.f_locals['self'].query
+            # Python 2 and 3 have a different structure here.
+            function = getattr(frame, 'function', None) or frame[3]
+            frame = getattr(frame, 'frame', None) or frame[0]
+
+            if function in ['get_default_columns', 'get_order_by']:
+                query = frame.f_locals['self'].query
                 break
-            if frame.function in ['add_fields', 'build_filter']:
-                query = frame.frame.f_locals['self']
+            if function in ['add_fields', 'build_filter']:
+                query = frame.f_locals['self']
                 break
         else:
             import pdb; pdb.set_trace()  # NOQA
