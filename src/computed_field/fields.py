@@ -49,11 +49,9 @@ class ComputedField(models.Field):
                 # really shouldn't, which could affect places where the same expression
                 # was shared between different things.
                 expression = expression.copy()
-                sources = expression.get_source_expressions()
-                resolved = [resolve_f(expr, query) for expr in sources]
-                if sources != resolved:
-                    expression.set_source_expressions(resolved)
-
+                expression.set_source_expressions([
+                    resolve_f(expr, query) for expr in expression.get_source_expressions()
+                ])
             if isinstance(expression, models.F):
                 # If we are dealing with an F() expression, we want to try to resolve
                 # it to a Col(alias, field) for the relevant field on our model.

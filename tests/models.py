@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.expressions import Value
 from django.db.models.functions import Concat, Lower
 
 from computed_field.fields import ComputedField
