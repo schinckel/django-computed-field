@@ -8,8 +8,15 @@ class ComputedField(models.Field):
     def __init__(self, expression, *args, **kwargs):
         # We want to trigger the read-only behaviour in the admin.
         kwargs.update(editable=False)
-        # Ensure we have an output field on our expression?
-        self.expression = expression.copy()
+        # If our expression has a "copy" attribute, then we want to make a copy of it.
+        # It's possible the reference could be re-used elsewhere, so we need to make
+        # sure that we have a copy of what it looks like now, rather than if someone
+        # mutates is. If our expression is an F() expression, for instance, we will
+        # not have a copy() method, and that's fine.
+        if hasattr(expression, 'copy'):
+            self.expression = expression.copy()
+        else:
+            self.expression = expression
         super(ComputedField, self).__init__(*args, **kwargs)
         # Can we prevent this field from being used in a form?
 
@@ -26,8 +33,7 @@ class ComputedField(models.Field):
         return name, path, [self.expression] + args, kwargs
 
     def get_col(self, alias, output_field=None):
-
-        def resolve_f(expression):
+        def resolve_f(expression, query):
             # Because of the fact that F() expressions refer to the "local" table,
             # we need to resolve these to a Col() expression that uses the table
             # alias (supplied to us), and the field that the F() expression refers
@@ -42,17 +48,27 @@ class ComputedField(models.Field):
                 # was shared between different things.
                 expression = expression.copy()
                 expression.set_source_expressions([
-                    resolve_f(expr) for expr in expression.get_source_expressions()
+                    resolve_f(expr, query) for expr in expression.get_source_expressions()
                 ])
             if isinstance(expression, models.F):
                 # If we are dealing with an F() expression, we want to try to resolve
                 # it to a Col(alias, field) for the relevant field on our model.
                 # If that is a ComputedField(), then just resolve the F() expressions
                 # inside that.
-                field = self.model._meta.get_field(expression.name)
+
+                # This uses the same code as django.db.models.sql.Query.resolve_ref(), except
+                # it uses the current ComputedField to determine the table to which the join
+                # needs to refer.
+                field_parts = expression.name.split('__')
+                current_alias, ref = query.table_alias(self.model._meta.db_table)
+                join_info = query.setup_joins(field_parts, self.model._meta, current_alias)
+                targets, final_alias, join_list = query.trim_joins(join_info.targets, join_info.joins, join_info.path)
+                join_info.transform_function(targets[0], final_alias)
+                field = join_info.targets[0]
                 if hasattr(field, 'expression'):
-                    return resolve_f(field.expression)
-                return Col(alias, field)
+                    return resolve_f(field.expression, query)
+                return Col(join_list[-1], join_info.targets[0])
+
             return expression
 
         # I'd love some way to get the query object without having to peek up the stack...
@@ -71,9 +87,8 @@ class ComputedField(models.Field):
         else:
             import pdb; pdb.set_trace()  # NOQA
 
-        col = resolve_f(self.expression).resolve_expression(query=query)
-        col.target = self
-        col.alias = self.name
+        col = resolve_f(self.expression, query).resolve_expression(query=query)
+        col.target = getattr(col, 'target', self)
         return col
 
     def contribute_to_class(self, cls, name, private_only=False):

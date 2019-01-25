@@ -44,6 +44,13 @@ However, it would be neat if it we could define this field directly on the model
             ),
         )
 
+        group = ComputedField(
+            ExpressionWrapper(models.F('user__group__name')),
+            output_field=models.TextField()
+        )
+
+
+We can also, as shown in the `group` field, refer to foreign keys. This does require us to use an ExpressionWrapper, and provide the correct output_field.
 
 This is still a proof of concept: whilst it works in the tests I have written so far, it may not work in all cases (and actually still contains a `pdb` breakpoint, sort-of deliberately).
 

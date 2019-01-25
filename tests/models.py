@@ -1,11 +1,21 @@
 from django.db import models
-from django.db.models.expressions import Value
+from django.db.models.expressions import Value, ExpressionWrapper
 from django.db.models.functions import Concat, Lower
 
 from computed_field.fields import ComputedField
 
 
+class Group(models.Model):
+    name = models.TextField()
+
+
+class User(models.Model):
+    username = models.TextField()
+    group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
+
+
 class Person(models.Model):
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     first_name = models.TextField()
     last_name = models.TextField()
 
@@ -15,6 +25,9 @@ class Person(models.Model):
     ))
 
     lower_name = ComputedField(Lower(models.F('name')), db_index=True)
+
+    username = ComputedField(models.F('user__username'))
+    group = ComputedField(models.F('user__group__name'))
 
     class Meta:
         indexes = [
