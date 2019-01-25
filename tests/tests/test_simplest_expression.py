@@ -14,6 +14,17 @@ def test_create_works():
     Person.objects.create(first_name='Foo', last_name='Bar')
 
 
+def test_create_with_value_in_computed_field_works():
+    Person.objects.create(first_name='Foo', last_name='Bar', name='Foo Bar')
+
+
+def test_object_loaded_can_be_saved():
+    Person.objects.create(first_name='Foo', last_name='Bar')
+    person = Person.objects.get()
+    person.first_name = 'Fooo'
+    person.save()
+
+
 def test_computed_field_is_set_on_object():
     Person.objects.create(first_name='Foo', last_name='Bar')
     assert Person.objects.get().name == 'Foo Bar'
@@ -42,3 +53,7 @@ def test_cascading_field():
 
 def test_ordering():
     assert len(Person.objects.order_by('name')) == 0
+
+
+def test_bulk_create():
+    Person.objects.bulk_create([Person(first_name='Bulk', last_name='Create')])
