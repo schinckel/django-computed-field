@@ -3,6 +3,7 @@ import inspect
 import django
 from django.db import models
 from django.db.models.expressions import Col
+from django.db.models.aggregates import Aggregate
 
 
 class ComputedField(models.Field):
@@ -48,9 +49,11 @@ class ComputedField(models.Field):
                 # really shouldn't, which could affect places where the same expression
                 # was shared between different things.
                 expression = expression.copy()
-                expression.set_source_expressions([
-                    resolve_f(expr, query) for expr in expression.get_source_expressions()
-                ])
+                sources = expression.get_source_expressions()
+                resolved = [resolve_f(expr, query) for expr in sources]
+                if sources != resolved:
+                    expression.set_source_expressions(resolved)
+
             if isinstance(expression, models.F):
                 # If we are dealing with an F() expression, we want to try to resolve
                 # it to a Col(alias, field) for the relevant field on our model.
@@ -83,6 +86,11 @@ class ComputedField(models.Field):
                     return resolve_f(field.expression, query)
                 return Col(join_list[-1], field)
 
+            if isinstance(expression, Aggregate):
+                if query.group_by:
+                    query.group_by += (self.model._meta.pk.name,)
+                else:
+                    query.group_by = (self.model._meta.pk.name,)
             return expression
 
         # I'd love some way to get the query object without having to peek up the stack...

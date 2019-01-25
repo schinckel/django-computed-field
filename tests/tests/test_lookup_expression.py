@@ -1,4 +1,4 @@
-from ..models import Person, User, Group
+from ..models import Person, User, Group, Location
 
 
 def test_empty_lookup():
@@ -39,4 +39,15 @@ def test_many_to_many():
     bob = Person.objects.create(first_name='Bob', last_name='B')
     carol = Person.objects.create(first_name='Carol', last_name='C')
 
-    alice.follows.add(bob, carol)
+    one = Location.objects.create(name='One')
+    two = Location.objects.create(name='Two')
+    three = Location.objects.create(name='Three')
+
+    one.people.add(alice, bob)
+    two.people.add(carol, alice, bob)
+
+    locations = Location.objects.order_by('person_count')
+    assert len(locations) == 3
+    assert locations[0] == three
+    assert locations[1] == one
+    assert locations[2] == two
