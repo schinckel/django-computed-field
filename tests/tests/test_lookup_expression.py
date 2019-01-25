@@ -35,10 +35,8 @@ def test_multiple_lookups():
 
 
 def test_many_to_many():
-    alice, bob, carol = Person.objects.bulk_create([
-        Person(first_name='Alice', last_name='A'),
-        Person(first_name='Bob', last_name='B'),
-        Person(first_name='Carol', last_name='C'),
-    ])
+    alice = Person.objects.create(first_name='Alice', last_name='A')
+    bob = Person.objects.create(first_name='Bob', last_name='B')
+    carol = Person.objects.create(first_name='Carol', last_name='C')
 
     alice.follows.add(bob, carol)

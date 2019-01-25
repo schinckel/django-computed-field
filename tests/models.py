@@ -30,7 +30,7 @@ class Person(models.Model):
     username = ComputedField(models.F('user__username'))
     group = ComputedField(models.F('user__group__name'))
 
-    follower_names = ComputedField(models.F('follows__name'))
+    # follower_count = ComputedField(models.Count('follows__name'))
 
     class Meta:
         indexes = [
