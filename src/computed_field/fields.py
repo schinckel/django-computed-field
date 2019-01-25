@@ -1,5 +1,6 @@
 import inspect
 
+import django
 from django.db import models
 from django.db.models.expressions import Col
 
@@ -62,12 +63,25 @@ class ComputedField(models.Field):
                 field_parts = expression.name.split('__')
                 current_alias, ref = query.table_alias(self.model._meta.db_table)
                 join_info = query.setup_joins(field_parts, self.model._meta, current_alias)
-                targets, final_alias, join_list = query.trim_joins(join_info.targets, join_info.joins, join_info.path)
-                join_info.transform_function(targets[0], final_alias)
-                field = join_info.targets[0]
+
+                if django.VERSION < (2, 0):
+                    targets, final_alias, join_list = query.trim_joins(
+                        join_info[1],  # join_info.targets,
+                        join_info[3],  # join_info.joins,
+                        join_info[4],  # join_info.path,
+                    )
+                    field = join_info[1][0]
+                else:
+                    targets, final_alias, join_list = query.trim_joins(
+                        join_info.targets,
+                        join_info.joins,
+                        join_info.path,
+                    )
+                    join_info.transform_function(targets[0], final_alias)
+                    field = join_info.targets[0]
                 if hasattr(field, 'expression'):
                     return resolve_f(field.expression, query)
-                return Col(join_list[-1], join_info.targets[0])
+                return Col(join_list[-1], field)
 
             return expression
 
