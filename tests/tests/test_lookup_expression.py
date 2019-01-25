@@ -32,3 +32,13 @@ def test_multiple_lookups():
     assert Person.objects.get().group == 'qux'
     assert Person.objects.filter(group='qux').exists()
     assert not Person.objects.filter(group=None).exists()
+
+
+def test_many_to_many():
+    alice, bob, carol = Person.objects.bulk_create([
+        Person(first_name='Alice', last_name='A'),
+        Person(first_name='Bob', last_name='B'),
+        Person(first_name='Carol', last_name='C'),
+    ])
+
+    alice.follows.add(bob, carol)
