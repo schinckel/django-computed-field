@@ -18,6 +18,7 @@ class Person(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     first_name = models.TextField()
     last_name = models.TextField()
+    follows = models.ManyToManyField('tests.Person', related_name='followed_by')
 
     name = ComputedField(Concat(
         models.F('first_name'), Value(' '), models.F('last_name'),
@@ -29,7 +30,7 @@ class Person(models.Model):
     username = ComputedField(models.F('user__username'))
     group = ComputedField(models.F('user__group__name'))
 
-    # follower_count = ComputedField(models.Count('follows__name'))
+    follower_names = ComputedField(models.F('follows__name'))
 
     class Meta:
         indexes = [
