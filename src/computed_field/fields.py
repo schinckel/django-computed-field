@@ -3,6 +3,7 @@ import inspect
 import django
 from django.db import models
 from django.db.models.expressions import Col
+from django.db.models.aggregates import Aggregate
 
 
 class ComputedField(models.Field):
@@ -83,6 +84,11 @@ class ComputedField(models.Field):
                     return resolve_f(field.expression, query)
                 return Col(join_list[-1], field)
 
+            if isinstance(expression, Aggregate):
+                if query.group_by:
+                    query.group_by += (self.model._meta.pk.name,)
+                else:
+                    query.group_by = (self.model._meta.pk.name,)
             return expression
 
         # I'd love some way to get the query object without having to peek up the stack...
