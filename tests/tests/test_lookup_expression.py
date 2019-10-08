@@ -47,6 +47,7 @@ def test_many_to_many():
     two.people.add(carol, alice, bob)
 
     locations = Location.objects.order_by('person_count')
+    assert False == str(locations.query)
     assert len(locations) == 3
     assert locations[0] == three
     assert locations[1] == one
